@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">TweetItSweet</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search_twitter">Search Twitter</string>
+    <string name="des_logo">logo</string>
+    <string name="sharedTransitionName">EditTextAnimation</string>
+    <string name="userHandlePlaceholder">\@ %1$s</string>
+    <string name="resultsFoundPlaceholder">%1$s Results Found</string>
+    <string name="sorted_by_popularity">Restore List</string>
+    <string name="sort_by_popularity">Sort by popularity</string>
+    <string name="that_s_it_for_now">That\'s it for now !!</string>
+    <string name="retry">Retry</string>
+    <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try
+        again
+    </string>
+    <string name="no_internet">No Internet</string>
+    <string name="userprofileimage">userProfileImage</string>
+    <string name="toast_message">List has been updated and sorted</string>
+</resources>
