@@ -15,6 +15,7 @@ fun Status.getRank():Double{
     return growthOfPost+growthOfUser + isVerified
 }
 
+
 fun computePostGrowth(status: Status): Double {
 
     val secondsSincePost = getSecondsSincePost(status.user.createdAt.time)

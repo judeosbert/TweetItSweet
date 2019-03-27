@@ -1,5 +1,7 @@
 package com.butterfly.klepto.tweetitsweet.twitter
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import com.butterfly.klepto.tweetitsweet.constants.Constants
 import com.butterfly.klepto.tweetitsweet.twitter.asynctasks.GetPopularTagsTask
 import com.butterfly.klepto.tweetitsweet.twitter.asynctasks.GetTweetsTask
@@ -41,7 +43,7 @@ class TwitterManager {
 
 
     interface TwitterManagerSearchCallback{
-        fun onSearchResultReady(queryResult: QueryResult)
+        fun onSearchResultReady(queryResult: QueryResult):MutableLiveData<QueryResult>
     }
     interface TwitterManagerPopularTagsCallback{
         fun onPopularTagsReady(results: Trends)

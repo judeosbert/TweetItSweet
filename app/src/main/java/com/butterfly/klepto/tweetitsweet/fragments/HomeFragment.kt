@@ -1,8 +1,10 @@
 package com.butterfly.klepto.tweetitsweet.fragments
 
+import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
@@ -16,11 +18,14 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ProgressBar
+import com.butterfly.klepto.tweetitsweet.NoInternetActivity
 import com.butterfly.klepto.tweetitsweet.R
 import com.butterfly.klepto.tweetitsweet.adapter.PopularTagsRecyclerAdapter
 import com.butterfly.klepto.tweetitsweet.utils.CommonUtils
 import com.butterfly.klepto.tweetitsweet.viewmodel.PopularTagsViewModel
+import org.koin.android.viewmodel.ext.android.viewModel
 import twitter4j.Trend
 
 
@@ -29,29 +34,12 @@ class HomeFragment : Fragment(), PopularTagsRecyclerAdapter.PopularTagsInterface
 
 
     private var listener: OnFragmentInteractionListener? = null
-    private lateinit var viewModel:PopularTagsViewModel
+    private val viewModel by viewModel<PopularTagsViewModel>()
     private lateinit var mPopularTagsRV: RecyclerView
     private lateinit var mSearchET: EditText
     private lateinit var mPopularTagsAdapter:PopularTagsRecyclerAdapter
     private var mEditTextWatcher = EditTextWatcher()
     private lateinit var mCircularProgress:ProgressBar
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(activity!!).get(PopularTagsViewModel::class.java)
-        viewModel.getData().observe(this,
-            Observer<List<Trend>> { result ->
-                hideProgress()
-                updateRecyclerViewData(result)
-            })
-        if(CommonUtils.isInternetConnected(context!!))
-            viewModel.fetchPopularTags()
-        else{
-
-        }
-        showProgress()
-
-    }
 
     private fun showProgress() {
         mCircularProgress.visibility = VISIBLE
@@ -61,6 +49,8 @@ class HomeFragment : Fragment(), PopularTagsRecyclerAdapter.PopularTagsInterface
         mCircularProgress.visibility = GONE
         mPopularTagsRV.visibility = VISIBLE
     }
+
+
 
     private fun updateRecyclerViewData(result: List<Trend>?) {
 
@@ -81,7 +71,22 @@ class HomeFragment : Fragment(), PopularTagsRecyclerAdapter.PopularTagsInterface
         super.onViewCreated(view, savedInstanceState)
         initializeViews(view)
         setupRecyclerView(view)
+        showProgress()
+        startObserve()
 
+
+    }
+
+    private fun startObserve() {
+        viewModel.trendResultLiveData.observe(this,
+            Observer<List<Trend>> { result ->
+                hideProgress()
+                updateRecyclerViewData(result)
+            })
+        if(CommonUtils.isInternetConnected(context!!))
+            viewModel.fetchPopularTags()
+        else
+            startActivityForResult(Intent(activity,NoInternetActivity::class.java),1000)
 
     }
 
@@ -105,6 +110,7 @@ class HomeFragment : Fragment(), PopularTagsRecyclerAdapter.PopularTagsInterface
 
     override fun onPopularTagsClicked(query: String) {
         listener!!.showQueryResults(query,mSearchET)
+        var view = ImageView(activity)
     }
 
 

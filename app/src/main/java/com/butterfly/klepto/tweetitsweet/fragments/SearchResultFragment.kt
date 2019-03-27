@@ -1,7 +1,6 @@
 package com.butterfly.klepto.tweetitsweet.fragments
 
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -28,6 +27,7 @@ import com.butterfly.klepto.tweetitsweet.extensions.getRank
 import com.butterfly.klepto.tweetitsweet.utils.CommonUtils
 import com.butterfly.klepto.tweetitsweet.viewmodel.TweetsViewModel
 import kotlinx.android.synthetic.main.search_result_fragment.*
+import org.koin.android.viewmodel.ext.android.viewModel
 import twitter4j.Status
 import java.net.URLDecoder
 import java.util.*
@@ -37,7 +37,7 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
 
     private lateinit var mResultsRV: RecyclerView
     private lateinit var mSearchET:EditText
-    private lateinit var mViewModel: TweetsViewModel
+    private val mViewModel by viewModel<TweetsViewModel>()
     private lateinit var mResultCountTV:TextView
     private lateinit var mSearchResultAdapter:SearchResultRecyclerAdapter
     private var mSearchTimer:Timer? = null
@@ -46,7 +46,6 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
     private lateinit var mDividerView:View
     private var hasNextPage:Boolean = false
 
-    private var mIsDataBeingLoaded = false
 
     companion object {
         fun newInstance() = SearchResultFragment()
@@ -70,21 +69,6 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
         return inflater.inflate(com.butterfly.klepto.tweetitsweet.R.layout.search_result_fragment, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProviders.of(this).get(TweetsViewModel::class.java)
-
-        mViewModel.getData().observe(this, Observer {result->
-            updateRecyclerView(result)
-            onDataUpdated()
-
-        })
-
-        mViewModel.getIsHaveNext().observe(this, Observer<Boolean> {
-            hasNextPage = it!!
-            updateRecyclerViewProgressBar(hasNextPage)
-        })
-    }
 
     private fun updateRecyclerViewProgressBar(hasNextPage: Boolean) {
         mSearchResultAdapter.hideProgressBar(hasNextPage)
@@ -107,14 +91,15 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
     private fun updateRecyclerView(result: List<Status>?) {
         mSearchProgress.visibility = GONE
         if(mSortButton.isChecked) {
-            mSearchResultAdapter.setData(result!!,mIsDataBeingLoaded,true)
+            mSearchResultAdapter.setData(result!!,mViewModel.getIsDataBeingLoaded(),true)
             sortData()
             Toast.makeText(context,context!!.getString(R.string.toast_message),Toast.LENGTH_SHORT).show()
         }else{
-            mSearchResultAdapter.setData(result!!,mIsDataBeingLoaded,false)
+            mSearchResultAdapter.setData(result!!,mViewModel.getIsDataBeingLoaded(),false)
         }
         mSearchResultAdapter.setQuery(mSearchET.text.toString())
-        mIsDataBeingLoaded = false
+        mViewModel.restLoadingFlag()
+
 
     }
 
@@ -125,8 +110,22 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
         setupListenersForSearch()
         hideResultUI()
         checkConnectivity()
+        startObserve()
 
 
+    }
+
+    private fun startObserve() {
+        mViewModel.tweetsLiveData.observe(this,
+            Observer<List<Status>> { result ->
+                updateRecyclerView(result)
+                onDataUpdated()
+            })
+
+        mViewModel.getIsHaveNext().observe(this, Observer<Boolean> {
+            hasNextPage = it!!
+            updateRecyclerViewProgressBar(hasNextPage)
+        })
     }
 
     private fun checkConnectivity() {
@@ -166,7 +165,7 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
                     mSearchTimer!!.schedule(object : TimerTask() {
                         override fun run() {
                             hasNextPage  = true
-                            mViewModel.fetchResults(s.toString(),false)
+                            mViewModel.fetchResults(s.toString())
 
                         }
 
@@ -216,9 +215,7 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
                 val totalItemCount = mResultsRV.layoutManager!!.itemCount
                 val lastVisibleItem = (recyclerView.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition()
 
-                if(lastVisibleItem == totalItemCount - 1){
-                    loadMoreData()
-                }
+                mViewModel.loadMore(totalItemCount,lastVisibleItem)
             }
 
 
@@ -226,14 +223,6 @@ class SearchResultFragment : Fragment(), View.OnClickListener {
 
 
 
-
-    }
-
-    private fun loadMoreData() {
-        if(!mIsDataBeingLoaded && hasNextPage){
-            mIsDataBeingLoaded = true
-            mViewModel.fetchResults("",true)
-        }
 
     }
 

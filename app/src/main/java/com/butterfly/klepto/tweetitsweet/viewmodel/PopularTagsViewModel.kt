@@ -1,32 +1,19 @@
 package com.butterfly.klepto.tweetitsweet.viewmodel
 
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.*
 import com.butterfly.klepto.tweetitsweet.repository.PopularTagsRepository
 import twitter4j.Trend
 import twitter4j.Trends
 
-class PopularTagsViewModel: ViewModel(), PopularTagsRepository.PopularTagsCallback {
+class PopularTagsViewModel(repository:PopularTagsRepository): ViewModel() {
 
-
-    private var trends:MutableLiveData<List<Trend>> = MutableLiveData()
-    private var repository: PopularTagsRepository? = null
+    var trendResultLiveData:MediatorLiveData<List<Trend>> = MediatorLiveData()
+    private var mRepository = repository
 
     fun fetchPopularTags(){
-        if(repository == null){
-            repository = PopularTagsRepository()
-        }
-        repository!!.fetchPopularTags(this)
-
+        trendResultLiveData.addSource(mRepository.fetchPopularTags()
+        ) { t -> trendResultLiveData.value = t }
     }
 
-    fun getData(): MutableLiveData<List<Trend>> {
-        return trends;
-    }
-
-
-    override fun onPopularTagsReady(result: Trends) {
-        trends.value = result.trends.toList();
-    }
 
 }
