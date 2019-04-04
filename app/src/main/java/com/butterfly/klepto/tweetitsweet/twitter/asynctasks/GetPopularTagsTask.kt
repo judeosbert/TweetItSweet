@@ -17,4 +17,5 @@ class GetPopularTagsTask(listener: TwitterManager.TwitterManagerPopularTagsCallb
         super.onPostExecute(result)
         mListener.onPopularTagsReady(result)
     }
+
 }

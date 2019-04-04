@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData
 import com.butterfly.klepto.tweetitsweet.constants.Constants
 import com.butterfly.klepto.tweetitsweet.twitter.asynctasks.GetPopularTagsTask
 import com.butterfly.klepto.tweetitsweet.twitter.asynctasks.GetTweetsTask
+import io.reactivex.Observable
 import twitter4j.*
 import twitter4j.conf.ConfigurationBuilder
 
@@ -34,8 +35,8 @@ class TwitterManager {
 
 
 
-        fun getPopularTags(listener:TwitterManagerPopularTagsCallback){
-            GetPopularTagsTask(listener).execute()
+        fun getPopularTags(): Observable<Trends> {
+            return com.butterfly.klepto.tweetitsweet.twitter.rxdatafetchers.getPopularTags()
         }
 
     }
