@@ -1,5 +1,6 @@
 package com.butterfly.klepto.tweetitsweet.extensions
 
+import twitter4j.QueryResult
 import twitter4j.Status
 import java.util.*
 
@@ -14,7 +15,6 @@ fun Status.getRank():Double{
         isVerified = 1
     return growthOfPost+growthOfUser + isVerified
 }
-
 
 fun computePostGrowth(status: Status): Double {
 

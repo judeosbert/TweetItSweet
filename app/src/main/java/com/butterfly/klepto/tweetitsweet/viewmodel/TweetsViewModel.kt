@@ -49,7 +49,6 @@ class TweetsViewModel(repository: TweetsRepository): ViewModel() {
             if(!mIsDataBeingLoaded && hasNext.value!!){
                 mIsDataBeingLoaded = true
                 getTweets("")
-
             }
         }
 

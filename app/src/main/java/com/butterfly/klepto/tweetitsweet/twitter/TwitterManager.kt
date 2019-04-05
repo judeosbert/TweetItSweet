@@ -1,10 +1,8 @@
 package com.butterfly.klepto.tweetitsweet.twitter
 
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import com.butterfly.klepto.tweetitsweet.constants.Constants
-import com.butterfly.klepto.tweetitsweet.twitter.asynctasks.GetPopularTagsTask
-import com.butterfly.klepto.tweetitsweet.twitter.asynctasks.GetTweetsTask
+import com.butterfly.klepto.tweetitsweet.twitter.rxdatafetchers.*
 import io.reactivex.Observable
 import twitter4j.*
 import twitter4j.conf.ConfigurationBuilder
@@ -28,9 +26,8 @@ class TwitterManager {
             return twitterFactory.instance
 
         }
-        fun getTweets(query:Query,listener:TwitterManagerSearchCallback){
-
-            GetTweetsTask(listener).execute(query)
+        fun getTweets(query:Query):Observable<QueryResult>{
+           return getTweetsForQuery(query)
         }
 
 
